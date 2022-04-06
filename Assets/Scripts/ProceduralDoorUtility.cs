@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.ProBuilder.MeshOperations;
 
+/// <summary>
+/// Provides functions which allow for the creation of procedural doors using ProBuilder.
+/// </summary>
 public class ProceduralDoorUtility
 {
     //Side names.
@@ -13,8 +16,17 @@ public class ProceduralDoorUtility
     public const string BOTTOM = "BOTTOM";
     public const string CENTER = "CENTER";
 
-    public static void assembleShape(GameObject parent, GameObject center, GameObject top, GameObject left, GameObject bottom, GameObject right)
+    /// <summary>
+    /// Assembles the shape with the passed in parts. This particular one helps to build a basic door shape.
+    /// </summary>
+    /// <param name="center">Center object of the door.</param>
+    /// <param name="top">Top rail of the door.</param>
+    /// <param name="left">Left rail of the door.</param>
+    /// <param name="bottom">Bottom rail of the door.</param>
+    /// <param name="right">Right rail of the door.</param>
+    public static void assembleShape(GameObject center, GameObject top, GameObject left, GameObject bottom, GameObject right)
     {
+        //Create the meshes to use.
         ProBuilderMesh centerMesh = center.GetComponent<ProBuilderMesh>();
         ProBuilderMesh topMesh = top.GetComponent<ProBuilderMesh>();
         ProBuilderMesh leftMesh = left.GetComponent<ProBuilderMesh>();
@@ -85,12 +97,25 @@ public class ProceduralDoorUtility
         //refreshMeshes(meshes);
     }
 
+    /// <summary>
+    /// Bevels a given edge of a given face by a given amount.
+    /// </summary>
+    /// <param name="mesh">Mesh to bevel.</param>
+    /// <param name="faceIndex">Face index of the Face whose Edge we will bevel.</param>
+    /// <param name="edgeIndex">Edge index we will bevel.</param>
+    /// <param name="amount">Amount to bevel by.</param>
     public static void bevelEdge(ProBuilderMesh mesh, int faceIndex, int edgeIndex, float amount)
     {
         Edge[] edges = new Edge[] { mesh.faces[faceIndex].edges[edgeIndex] };
         UnityEngine.ProBuilder.MeshOperations.Bevel.BevelEdges(mesh, edges, amount);
     }
 
+    /// <summary>
+    /// Combines all passed in meshes into one mesh.
+    /// </summary>
+    /// <param name="parentObj">Parent GameObject of the meshes.</param>
+    /// <param name="meshes">ProBulderMeshes to combine together.</param>
+    /// <returns></returns>
     public static List<ProBuilderMesh> combineAllMeshes(GameObject parentObj, List<ProBuilderMesh> meshes)
     {
         //Merge the center and sides into a single mesh.
@@ -121,9 +146,17 @@ public class ProceduralDoorUtility
         return result;
     }
 
-    public static GameObject makeProbuilderMesh(float extrustionFactor, List<Vector3> shapePoints, Material material, string side)
+    /// <summary>
+    /// Creates a poly shape with the passed in data. It also extrudes the mesh and applies a material to it.
+    /// </summary>
+    /// <param name="extrustionFactor">Amount to extrude by.</param>
+    /// <param name="shapePoints">Points that make up the shape to create.</param>
+    /// <param name="material">Material to apply to the mesh.</param>
+    /// <param name="objectName">Name of the mesh being created</param>
+    /// <returns>GameObject with the new ProBuilderMesh</returns>
+    public static GameObject makeProbuilderMesh(float extrustionFactor, List<Vector3> shapePoints, Material material, string objectName)
     {
-        GameObject gameObject = new GameObject(side);
+        GameObject gameObject = new GameObject(objectName);
 
         //Create the center mesh.
         ProBuilderMesh mesh = gameObject.AddComponent<ProBuilderMesh>();
@@ -133,12 +166,20 @@ public class ProceduralDoorUtility
         return gameObject;
     }
 
+    /// <summary>
+    /// Refreshes the passed in ProBuilderMesh.
+    /// </summary>
+    /// <param name="mesh">ProBuilderMesh to refresh.</param>
     public static void refreshMesh(ProBuilderMesh mesh)
     {
         mesh.ToMesh();
         mesh.Refresh();
     }
 
+    /// <summary>
+    /// Refresh passed in ProBuilderMeshes.
+    /// </summary>
+    /// <param name="meshes">ProBuilderMeshes to refresh.</param>
     public static void refreshMeshes(List<ProBuilderMesh> meshes)
     {
         foreach (ProBuilderMesh mesh in meshes)
@@ -147,6 +188,11 @@ public class ProceduralDoorUtility
         }
     }
 
+    /// <summary>
+    /// Rotate the passed in ProBuilderMesh's UVs by 90 degrees
+    /// </summary>
+    /// <param name="mesh">ProBuilderMesh whose UV we want to rotate.</param>
+    /// <param name="positive">TRUE=Rotate by positive 90 degrees. FALSE=Rotate by negative 90 degrees</param>
     public static void rotateUVs90(ProBuilderMesh mesh, bool positive)
     {
         foreach (Face face in mesh.faces)

@@ -6,8 +6,6 @@ using UnityEngine.ProBuilder.MeshOperations;
 
 /// <summary>
 /// Trying to make a basic door with a center and 4 sides.
-/// 
-/// All points must be plotted counter clockwise in the X,Z plane.
 /// </summary>
 public class ProceduralBasicDoor : MonoBehaviour
 {
@@ -22,12 +20,12 @@ public class ProceduralBasicDoor : MonoBehaviour
     protected List<Vector3> mSideShapePoints = new List<Vector3>();
 
     /// <summary>
-    /// 
+    /// Initialize the shape. 
     /// </summary>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
-    /// <param name="gameObject"></param>
-    /// <param name="material"></param>
+    /// <param name="width">Total width of the door.</param>
+    /// <param name="height">Total height of the door.</param>
+    /// <param name="material">Material to put on the door.</param>
+    /// <param name="sideWidth">Width of the rails around the door.</param>
     public void init(float width, float height, Material material, float sideWidth)
     {
         this.width = width;
@@ -36,6 +34,9 @@ public class ProceduralBasicDoor : MonoBehaviour
         this.sideWidth = sideWidth;
     }
 
+    /// <summary>
+    /// Initialize the points for the center of the door. All points must be plotted counter clockwise in the X,Z plane.
+    /// </summary>
     protected void initCenterShapePoints()
     {
         centerWidth = width - sideWidth * 2;
@@ -52,6 +53,9 @@ public class ProceduralBasicDoor : MonoBehaviour
         //mCenterShapePoints.Add(new Vector3(0, 0, 3));
     }
 
+    /// <summary>
+    /// Initialize the points for the sides of the door. All points must be plotted counter clockwise in the X,Z plane.
+    /// </summary>
     protected void initSideShapePoints()
     {
         mSideShapePoints.Add(new Vector3(0, 0, 0));
@@ -60,6 +64,9 @@ public class ProceduralBasicDoor : MonoBehaviour
         mSideShapePoints.Add(new Vector3(.75f, 0, 0));
     }
 
+    /// <summary>
+    /// Makes the door.
+    /// </summary>
     public void makeDoor()
     {
         initCenterShapePoints();
@@ -75,7 +82,7 @@ public class ProceduralBasicDoor : MonoBehaviour
         GameObject bottomObj = ProceduralDoorUtility.makeProbuilderMesh(centerWidth, mSideShapePoints, material, ProceduralDoorUtility.BOTTOM);
 
         //Combine all meshes into one object.
-        ProceduralDoorUtility.assembleShape(this.gameObject, centerObj, topObj, leftObj, bottomObj, rightObj);
+        ProceduralDoorUtility.assembleShape(centerObj, topObj, leftObj, bottomObj, rightObj);
 
         //Get all the meshes so we can bevel them and refresh them.
         ProBuilderMesh rightMesh = rightObj.GetComponent<ProBuilderMesh>();
@@ -94,6 +101,7 @@ public class ProceduralBasicDoor : MonoBehaviour
         ProceduralDoorUtility.rotateUVs90(rightMesh, true);
         ProceduralDoorUtility.rotateUVs90(leftMesh, false);
 
+        //Combine all the meshes so we only have one object.
         List<ProBuilderMesh> meshes = new List<ProBuilderMesh> { centerMesh, topMesh, leftMesh, bottomMesh, rightMesh };
         ProceduralDoorUtility.combineAllMeshes(this.gameObject, meshes);
 
