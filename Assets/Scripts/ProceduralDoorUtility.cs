@@ -24,49 +24,38 @@ public class ProceduralDoorUtility
     /// <param name="left">Left rail of the door.</param>
     /// <param name="bottom">Bottom rail of the door.</param>
     /// <param name="right">Right rail of the door.</param>
-    public static void assembleShape(GameObject center, GameObject top, GameObject left, GameObject bottom, GameObject right)
+    public static void assembleDoor(GameObject center, GameObject top, GameObject left, GameObject bottom, GameObject right)
     {
-        //Create the meshes to use.
-        ProBuilderMesh centerMesh = center.GetComponent<ProBuilderMesh>();
-        ProBuilderMesh topMesh = top.GetComponent<ProBuilderMesh>();
-        ProBuilderMesh leftMesh = left.GetComponent<ProBuilderMesh>();
-        ProBuilderMesh bottomMesh = bottom.GetComponent<ProBuilderMesh>();
-        ProBuilderMesh rightMesh = right.GetComponent<ProBuilderMesh>();
-        
         //Bounds for the different meshes.
         Bounds centerBounds = getTotalMeshFilterBounds(center.transform);
         Bounds topBounds = getTotalMeshFilterBounds(top.transform);
-        Bounds leftBounds = getTotalMeshFilterBounds(left.transform);
-        Bounds bottomBounds = getTotalMeshFilterBounds(bottom.transform);
         Bounds rightBounds = getTotalMeshFilterBounds(right.transform);
 
         //Position and rotate the meshes properly.
         //right
-        right.transform.position = new Vector3(center.transform.position.x,
-            center.transform.position.y - topBounds.size.z,
-            center.transform.position.z - rightBounds.size.z);
+        right.transform.position = new Vector3(center.transform.position.x - rightBounds.size.x,
+            center.transform.position.y - topBounds.size.y,
+            center.transform.position.z);
 
         right.transform.eulerAngles = new Vector3(
             center.transform.eulerAngles.x,
             center.transform.eulerAngles.y,
-            center.transform.eulerAngles.z
-        );
+            center.transform.eulerAngles.z);
 
         //top
         top.transform.position = new Vector3(center.transform.position.x,
-            center.transform.position.y + centerBounds.size.y + topBounds.size.z,
+            center.transform.position.y + centerBounds.size.y,
             center.transform.position.z);
 
         top.transform.eulerAngles = new Vector3(
-            center.transform.eulerAngles.x + 90f,
+            center.transform.eulerAngles.x,
             center.transform.eulerAngles.y,
-            center.transform.eulerAngles.z
-        );
+            center.transform.eulerAngles.z);
 
         //left
-        left.transform.position = new Vector3(center.transform.position.x,
-            center.transform.position.y - topBounds.size.z,
-            center.transform.position.z + centerBounds.size.z);
+        left.transform.position = new Vector3(center.transform.position.x + centerBounds.size.x,
+            center.transform.position.y - topBounds.size.y,
+            center.transform.position.z);
 
         left.transform.eulerAngles = new Vector3(
             center.transform.eulerAngles.x,
@@ -75,26 +64,13 @@ public class ProceduralDoorUtility
 
         //bottom
         bottom.transform.position = new Vector3(center.transform.position.x,
-            center.transform.position.y,
+            center.transform.position.y - topBounds.size.y,
             center.transform.position.z);
 
         bottom.transform.eulerAngles = new Vector3(
-            center.transform.eulerAngles.x + 90f,
+            center.transform.eulerAngles.x,
             center.transform.eulerAngles.y,
             center.transform.eulerAngles.z);
-
-        //rotateUVs90(rightMesh, true);
-        //rotateUVs90(leftMesh, false);
-
-        //bevelEdge(bottomMesh, 2, 1, .062f);
-        //bevelEdge(rightMesh, 5, 2, .062f);
-        //bevelEdge(leftMesh, 2, 1, .062f);
-        //bevelEdge(topMesh, 5, 2, .062f);
-
-        //combineAllMeshes(parent, new List<ProBuilderMesh> { centerMesh, topMesh, leftMesh, bottomMesh, rightMesh });
-
-        //List<ProBuilderMesh> meshes = new List<ProBuilderMesh> { centerMesh, topMesh, leftMesh, bottomMesh, rightMesh };
-        //refreshMeshes(meshes);
     }
 
     /// <summary>
@@ -158,7 +134,6 @@ public class ProceduralDoorUtility
     {
         GameObject gameObject = new GameObject(objectName);
 
-        //Create the center mesh.
         ProBuilderMesh mesh = gameObject.AddComponent<ProBuilderMesh>();
         mesh.CreateShapeFromPolygon(shapePoints.ToArray(), extrustionFactor, false);
         mesh.SetMaterial(mesh.faces, material);

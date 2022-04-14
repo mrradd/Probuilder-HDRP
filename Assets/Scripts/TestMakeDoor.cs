@@ -7,9 +7,12 @@ using UnityEngine;
 /// </summary>
 public class TestMakeDoor : MonoBehaviour
 {
+    [Header("Dimensions get converted from Unity units (m) to feet.")]
     public float width;
     public float height;
-    public float sideWidth = 2.5f;
+    public float railWidth = 2.5f;
+    public float railDepth = .04f;
+    public float centerDepth = .02f;
     public int numberOfObjects;
     public GameObject doorObject;
     public Material material;
@@ -32,10 +35,11 @@ public class TestMakeDoor : MonoBehaviour
 
             //Make the door.
             GameObject gameObject = new GameObject("ProceduralDoor-" + i);
-            ProceduralBasicDoor door = gameObject.AddComponent<ProceduralBasicDoor>();
-            door.init(width, height, material, sideWidth);
+            ProbuilderShakerDoor door = gameObject.AddComponent<ProbuilderShakerDoor>();
+            door.init(width, height, railWidth, railDepth, centerDepth, material, gameObject);
+            door.transform.position = doorObject.transform.position;
             door.makeDoor();
-            door.transform.position = new Vector3(0, height / 4 + 5, i * width + i * 10);
+            
         }
 
         sw.Stop();
