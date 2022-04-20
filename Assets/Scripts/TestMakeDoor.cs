@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static ProbuilderUtility;
 
 /// <summary>
 /// Creates Procedural Door objects.
@@ -12,6 +13,7 @@ public class TestMakeDoor : MonoBehaviour
     public float height;
     public float railWidth = 2.5f;
     public float railDepth = .04f;
+    public float cabinetDepth = .02f;
     public float centerDepth = .02f;
     public int numberOfObjects;
     public GameObject doorObject;
@@ -34,11 +36,11 @@ public class TestMakeDoor : MonoBehaviour
             }
 
             //Make the door.
-            GameObject gameObject = new GameObject("ProceduralDoor-" + i);
-            ProbuilderShakerDoor door = gameObject.AddComponent<ProbuilderShakerDoor>();
-            door.init(width, height, railWidth, railDepth, centerDepth, material, gameObject);
-            door.transform.position = doorObject.transform.position;
-            door.makeDoor();
+            GameObject gameObject = new GameObject("ProBuilderDoor-" + i);
+            ProbuilderCabinetWithShakerDoor door = gameObject.AddComponent<ProbuilderCabinetWithShakerDoor>();
+            door.Init(width, height, cabinetDepth, railWidth, railDepth, centerDepth, HandlePlacement.Middle, DoorOpenDirection.Left, material, gameObject);
+            gameObject.transform.position = doorObject.transform.position;
+            door.MakeDoor();
             
         }
 
