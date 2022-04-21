@@ -9,17 +9,17 @@ using UnityEngine.ProBuilder.MeshOperations;
 /// </summary>
 public class ProbuilderUtility
 {
+    public enum DoorOpenDirection
+    {
+        Left,
+        Right
+    }
+
     public enum HandlePlacement
     {
         Top,
         Middle,
         Bottom,
-    }
-
-    public enum DoorOpenDirection
-    {
-        Left,
-        Right
     }
 
     public enum Side
@@ -67,6 +67,25 @@ public class ProbuilderUtility
     }
 
     /// <summary>
+    /// Creates a poly shape with the passed in data. It also extrudes the mesh and applies a material to it.
+    /// </summary>
+    /// <param name="extrustionFactor">Amount to extrude by.</param>
+    /// <param name="shapePoints">Points that make up the shape to create.</param>
+    /// <param name="material">Material to apply to the mesh.</param>
+    /// <param name="objectName">Name of the mesh being created</param>
+    /// <returns>GameObject with the new ProBuilderMesh</returns>
+    public static GameObject CreateShapeFromPolygon(float extrustionFactor, List<Vector3> shapePoints, Material material, string objectName)
+    {
+        GameObject gameObject = new GameObject(objectName);
+
+        ProBuilderMesh mesh = gameObject.AddComponent<ProBuilderMesh>();
+        mesh.CreateShapeFromPolygon(shapePoints.ToArray(), extrustionFactor, false);
+        mesh.SetMaterial(mesh.faces, material);
+
+        return gameObject;
+    }
+
+    /// <summary>
     /// Calculates the bounds of the passed in transform.
     /// </summary>
     /// <param name="objectTransform">Transform to calculate bounds for.</param>
@@ -97,25 +116,6 @@ public class ProbuilderUtility
         cube.transform.name = objectName;
 
         return cube.gameObject;
-    }
-
-    /// <summary>
-    /// Creates a poly shape with the passed in data. It also extrudes the mesh and applies a material to it.
-    /// </summary>
-    /// <param name="extrustionFactor">Amount to extrude by.</param>
-    /// <param name="shapePoints">Points that make up the shape to create.</param>
-    /// <param name="material">Material to apply to the mesh.</param>
-    /// <param name="objectName">Name of the mesh being created</param>
-    /// <returns>GameObject with the new ProBuilderMesh</returns>
-    public static GameObject CreateShapeFromPolygon(float extrustionFactor, List<Vector3> shapePoints, Material material, string objectName)
-    {
-        GameObject gameObject = new GameObject(objectName);
-
-        ProBuilderMesh mesh = gameObject.AddComponent<ProBuilderMesh>();
-        mesh.CreateShapeFromPolygon(shapePoints.ToArray(), extrustionFactor, false);
-        mesh.SetMaterial(mesh.faces, material);
-        
-        return gameObject;
     }
 
     /// <summary>

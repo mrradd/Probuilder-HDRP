@@ -22,12 +22,11 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
     protected float mCenterHeight = 0f;
     protected HandlePlacement mHandlePlacement;
     protected DoorOpenDirection mDoorOpenDirection;
-    protected ProBuilderMesh mHandleMesh;
 
     protected List<Vector3> mCenterShapePoints = new List<Vector3>();
     protected List<Vector3> mLeftRightRailPoints = new List<Vector3>();
     protected List<Vector3> mTopBottomRailPoints = new List<Vector3>();
-    protected List<Vector3> mCabinetBodyPoints = new List<Vector3>();
+    protected List<Vector3> mBodyShapePoints = new List<Vector3>();
 
     protected float mWidth;
     protected float mHeight;
@@ -38,21 +37,21 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
     protected float mCenterDepth;
     protected float mCabinetDepth;
 
-    /// <summary>
-    /// Assembles the cabinet with the passed in parts.
-    /// </summary>
-    /// <param name="center">Center object of the door.</param>
-    /// <param name="top">Top rail of the door.</param>
-    /// <param name="left">Left rail of the door.</param>
-    /// <param name="bottom">Bottom rail of the door.</param>
-    /// <param name="right">Right rail of the door.</param>
-    /// <param name="body">Back of the cabinet.</param>
-    /// <param name="handle">Handle of the cabinet.</param>
-    protected void AssembleCabinet(GameObject center, GameObject top, GameObject left, GameObject bottom, GameObject right, GameObject body, GameObject handle)
-    {
-        PlaceParts(center, top, left, bottom, right, body);
-        PlaceHandle(left, right, handle);
-    }
+    protected GameObject mCenterObj;
+    protected GameObject mRightObj;
+    protected GameObject mLeftObj;
+    protected GameObject mTopObj;
+    protected GameObject mBottomObj;
+    protected GameObject mBodyObj;
+    protected GameObject mHandleObj;
+
+    protected ProBuilderMesh mRightMesh;
+    protected ProBuilderMesh mBottomMesh;
+    protected ProBuilderMesh mLeftMesh;
+    protected ProBuilderMesh mTopMesh;
+    protected ProBuilderMesh mCenterMesh;
+    protected ProBuilderMesh mBodyMesh;
+    protected ProBuilderMesh mHandleMesh;
 
     /// <summary>
     /// Initialize the shape. Converts dimensions from meters to feet.
@@ -67,7 +66,7 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
     /// <param name="doorOpenDirection">The direction the door would open.</param>
     /// <param name="material">Material of the cabinet</param>
     /// <param name="parent">Parent object anchor to.</param>
-    public void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, HandlePlacement handlePlacement, DoorOpenDirection doorOpenDirection, Material material, GameObject parent)
+    public virtual void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, HandlePlacement handlePlacement, DoorOpenDirection doorOpenDirection, Material material, GameObject parent)
     {
         this.mParent = parent;
         this.mWidth = width / Constants.FeetInAMeter;
@@ -86,12 +85,12 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
     /// <summary>
     /// Initializes the body of the cabinet.
     /// </summary>
-    protected void InitCabinetBodyPoints()
+    protected void InitBodyShapePoints()
     {
-        mCabinetBodyPoints.Add(new Vector3(mWidth, 0, 0));
-        mCabinetBodyPoints.Add(new Vector3(mWidth, mHeight, 0));
-        mCabinetBodyPoints.Add(new Vector3(0, mHeight, 0));
-        mCabinetBodyPoints.Add(new Vector3(0, 0, 0));
+        mBodyShapePoints.Add(new Vector3(mWidth, 0, 0));
+        mBodyShapePoints.Add(new Vector3(mWidth, mHeight, 0));
+        mBodyShapePoints.Add(new Vector3(0, mHeight, 0));
+        mBodyShapePoints.Add(new Vector3(0, 0, 0));
     }
 
     /// <summary>
@@ -128,40 +127,50 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
     }
 
     /// <summary>
-    /// Makes the door.
+    /// Makes a handle.
     /// </summary>
-    public void MakeDoor()
+    /// <returns>GameObject for the handle.</returns>
+    protected virtual GameObject MakeHandle()
+    {
+        return ProbuilderUtility.GenerateCube(new Vector3(.02f, .1f, .05f), mMaterial, "Handle");
+    }
+
+    /// <summary>
+    /// Makes the cabinet.
+    /// </summary>
+    public virtual void MakeShape()
     {
         InitCenterShapePoints();
         InitLeftAndRightRailPoints();
         InitTopAndBottomRailPoints();
-        InitCabinetBodyPoints();
+        InitBodyShapePoints();
 
         GameObject proBuilderParentObj = new GameObject();
         proBuilderParentObj.transform.name = "TEST";//TODO CH  TESTING
 
         //Build each object for each side. 
-        GameObject centerObj = ProbuilderUtility.CreateShapeFromPolygon(mCenterDepth, mCenterShapePoints, mMaterial, ProbuilderUtility.Side.Center.ToString());
-        GameObject rightObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mLeftRightRailPoints, mMaterial, ProbuilderUtility.Side.Right.ToString());
-        GameObject leftObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mLeftRightRailPoints, mMaterial, ProbuilderUtility.Side.Left.ToString());
-        GameObject topObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mTopBottomRailPoints, mMaterial, ProbuilderUtility.Side.Top.ToString());
-        GameObject bottomObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mTopBottomRailPoints, mMaterial, ProbuilderUtility.Side.Bottom.ToString());
-        GameObject bodyObj = ProbuilderUtility.CreateShapeFromPolygon(mCabinetDepth - mRailDepth, mCabinetBodyPoints, mMaterial, ProbuilderUtility.Side.Body.ToString());
-        GameObject handleObj = ProbuilderUtility.GenerateCube(new Vector3(.02f, .1f, .05f), mMaterial, "Handle");
+        mCenterObj = ProbuilderUtility.CreateShapeFromPolygon(mCenterDepth, mCenterShapePoints, mMaterial, ProbuilderUtility.Side.Center.ToString());
+        mRightObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mLeftRightRailPoints, mMaterial, ProbuilderUtility.Side.Right.ToString());
+        mLeftObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mLeftRightRailPoints, mMaterial, ProbuilderUtility.Side.Left.ToString());
+        mTopObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mTopBottomRailPoints, mMaterial, ProbuilderUtility.Side.Top.ToString());
+        mBottomObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mTopBottomRailPoints, mMaterial, ProbuilderUtility.Side.Bottom.ToString());
+        mBodyObj = ProbuilderUtility.CreateShapeFromPolygon(mCabinetDepth - mRailDepth, mBodyShapePoints, mMaterial, ProbuilderUtility.Side.Body.ToString());
+        mHandleObj = MakeHandle();
 
-        centerObj.transform.position = proBuilderParentObj.transform.position;
+        mCenterObj.transform.position = proBuilderParentObj.transform.position;
 
         //Put all the pieces together into a cabinet shape.
-        AssembleCabinet(centerObj, topObj, leftObj, bottomObj, rightObj, bodyObj, handleObj);
+        PlaceParts();
+        PlaceHandle();
 
         //Get all the meshes so we can bevel them and refresh them.
-        ProBuilderMesh rightMesh = rightObj.GetComponent<ProBuilderMesh>();
-        ProBuilderMesh bottomMesh = bottomObj.GetComponent<ProBuilderMesh>();
-        ProBuilderMesh leftMesh = leftObj.GetComponent<ProBuilderMesh>();
-        ProBuilderMesh topMesh = topObj.GetComponent<ProBuilderMesh>();
-        ProBuilderMesh centerMesh = centerObj.GetComponent<ProBuilderMesh>();
-        ProBuilderMesh bodyMesh = bodyObj.GetComponent<ProBuilderMesh>();
-        ProBuilderMesh handleMesh = handleObj.GetComponent<ProBuilderMesh>();
+        mRightMesh = mRightObj.GetComponent<ProBuilderMesh>();
+        mBottomMesh = mBottomObj.GetComponent<ProBuilderMesh>();
+        mLeftMesh = mLeftObj.GetComponent<ProBuilderMesh>();
+        mTopMesh = mTopObj.GetComponent<ProBuilderMesh>();
+        mCenterMesh = mCenterObj.GetComponent<ProBuilderMesh>();
+        mBodyMesh = mBodyObj.GetComponent<ProBuilderMesh>();
+        mHandleMesh = mHandleObj.GetComponent<ProBuilderMesh>();
 
         //Bevel the edges.
         //ProceduralDoorUtility.bevelEdge(bottomMesh, 2, 1, .062f);
@@ -170,27 +179,27 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         //ProceduralDoorUtility.bevelEdge(topMesh, 5, 2, .062f);
 
         //Rotate the right and left side UVs so they are oriented properly.
-        ProbuilderUtility.RotateUVs90(rightMesh, true);
-        ProbuilderUtility.RotateUVs90(leftMesh, false);
+        ProbuilderUtility.RotateUVs90(mRightMesh, true);
+        ProbuilderUtility.RotateUVs90(mLeftMesh, false);
 
         //Center the pivot in the back, bottom, center.
-        bodyMesh.CenterPivot(new int[] { 4, 5 });
+        mBodyMesh.CenterPivot(new int[] { 4, 5 });
 
         //Combine all the meshes so we only have one object. Something that is interesting is that the anchor point for the combined mesh is determined by the last mesh in this list.
-        List<ProBuilderMesh> meshes = new List<ProBuilderMesh> { centerMesh, topMesh, leftMesh, bottomMesh, rightMesh, handleMesh, bodyMesh };
+        List<ProBuilderMesh> meshes = new List<ProBuilderMesh> { mCenterMesh, mTopMesh, mLeftMesh, mBottomMesh, mRightMesh, mHandleMesh, mBodyMesh };
         ProbuilderUtility.CombineAllMeshes(proBuilderParentObj, meshes);
 
         //Refresh the meshes so everything is synced up.
         ProbuilderUtility.RefreshMeshes(meshes);
 
         //Clean up the unneeded objects.
-        DestroyImmediate(centerObj);
-        DestroyImmediate(topObj);
-        DestroyImmediate(leftObj);
-        DestroyImmediate(bottomObj);
-        DestroyImmediate(rightObj);
-        DestroyImmediate(bodyObj);
-        DestroyImmediate(handleObj);
+        DestroyImmediate(mCenterObj);
+        DestroyImmediate(mTopObj);
+        DestroyImmediate(mLeftObj);
+        DestroyImmediate(mBottomObj);
+        DestroyImmediate(mRightObj);
+        DestroyImmediate(mBodyObj);
+        DestroyImmediate(mHandleObj);
 
         proBuilderParentObj.transform.parent = mParent.transform;
         proBuilderParentObj.transform.eulerAngles = new Vector3(mParent.transform.eulerAngles.x, mParent.transform.eulerAngles.y, mParent.transform.eulerAngles.z);
@@ -200,24 +209,21 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
     /// <summary>
     /// Places the handle in the appropriate spot on the door; either the left or right side, and either in the top, middle, or bottom of the cabinet door.
     /// </summary>
-    /// <param name="left">Left Rail of the door.</param>
-    /// <param name="right">Right Rail of the door.</param>
-    /// <param name="handle">Handle of the door.</param>
-    public void PlaceHandle(GameObject left, GameObject right, GameObject handle)
+    protected virtual void PlaceHandle()
     {
         Bounds railBounds;
         GameObject rail;
 
         if (mDoorOpenDirection == ProbuilderUtility.DoorOpenDirection.Right)
         {
-            rail = left;
+            rail = mLeftObj;
         }
         else
         {
-            rail = right;
+            rail = mRightObj;
         }
 
-        handle.transform.parent = rail.transform;
+        mHandleObj.transform.parent = rail.transform;
         railBounds = ProbuilderUtility.GetTotalMeshFilterBounds(rail.transform);
 
         float xWithOffset = rail.transform.position.x + railBounds.size.x / 2;
@@ -225,99 +231,93 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         
         if (mHandlePlacement == ProbuilderUtility.HandlePlacement.Top)
         {
-            handle.transform.position = new Vector3(xWithOffset, railBounds.size.y - railBounds.size.y / 3, rail.transform.position.z);
+            mHandleObj.transform.position = new Vector3(xWithOffset, railBounds.size.y - railBounds.size.y / 3, rail.transform.position.z);
         }
         if (mHandlePlacement == ProbuilderUtility.HandlePlacement.Middle)
         {
-            handle.transform.position = new Vector3(xWithOffset, railBounds.size.y - railBounds.size.y / 4 - handleBounds.size.y / 3, rail.transform.position.z);
+            mHandleObj.transform.position = new Vector3(xWithOffset, railBounds.size.y - railBounds.size.y / 4 - handleBounds.size.y / 3, rail.transform.position.z);
         }
         if (mHandlePlacement == ProbuilderUtility.HandlePlacement.Bottom)
         {
-            handle.transform.position = new Vector3(xWithOffset, rail.transform.position.y + railBounds.size.y / 4, railBounds.size.z);
+            mHandleObj.transform.position = new Vector3(xWithOffset, rail.transform.position.y + railBounds.size.y / 4, railBounds.size.z);
         }
     }
 
     /// <summary>
-    /// Places the cabinet parts.
+    /// Places the cabinet sides and center parts.
     /// </summary>
-    /// <param name="center">Center object of the door.</param>
-    /// <param name="top">Top rail of the door.</param>
-    /// <param name="left">Left rail of the door.</param>
-    /// <param name="bottom">Bottom rail of the door.</param>
-    /// <param name="right">Right rail of the door.</param>
-    /// <param name="body">Back of the cabinet.</param>
-    protected void PlaceParts(GameObject center, GameObject top, GameObject left, GameObject bottom, GameObject right, GameObject body)
+    protected virtual void PlaceParts()
     {
         //Bounds for the different meshes.
-        Bounds centerBounds = ProbuilderUtility.GetTotalMeshFilterBounds(center.transform);
-        Bounds topBounds = ProbuilderUtility.GetTotalMeshFilterBounds(top.transform);
-        Bounds rightBounds = ProbuilderUtility.GetTotalMeshFilterBounds(right.transform);
-        Bounds bodyBounds = ProbuilderUtility.GetTotalMeshFilterBounds(body.transform);
+        Bounds centerBounds = ProbuilderUtility.GetTotalMeshFilterBounds(mCenterObj.transform);
+        Bounds topBounds = ProbuilderUtility.GetTotalMeshFilterBounds(mTopObj.transform);
+        Bounds rightBounds = ProbuilderUtility.GetTotalMeshFilterBounds(mRightObj.transform);
+        Bounds bodyBounds = ProbuilderUtility.GetTotalMeshFilterBounds(mBodyObj.transform);
 
         //Amount the door should be separated from the cabinet body.
         float doorFloatFactor = .0018f * Constants.FeetInAMeter;
 
         //Position and rotate the meshes properly.
         //right
-        right.transform.position = new Vector3(
-            center.transform.position.x - rightBounds.size.x,
-            center.transform.position.y - topBounds.size.y,
-            center.transform.position.z + doorFloatFactor);
+        mRightObj.transform.position = new Vector3(
+            mCenterObj.transform.position.x - rightBounds.size.x,
+            mCenterObj.transform.position.y - topBounds.size.y,
+            mCenterObj.transform.position.z + doorFloatFactor);
 
-        right.transform.eulerAngles = new Vector3(
-            center.transform.eulerAngles.x,
-            center.transform.eulerAngles.y,
-            center.transform.eulerAngles.z);
+        mRightObj.transform.eulerAngles = new Vector3(
+            mCenterObj.transform.eulerAngles.x,
+            mCenterObj.transform.eulerAngles.y,
+            mCenterObj.transform.eulerAngles.z);
 
         //top
-        top.transform.position = new Vector3(
-            center.transform.position.x,
-            center.transform.position.y + centerBounds.size.y,
-            center.transform.position.z + doorFloatFactor);
+        mTopObj.transform.position = new Vector3(
+            mCenterObj.transform.position.x,
+            mCenterObj.transform.position.y + centerBounds.size.y,
+            mCenterObj.transform.position.z + doorFloatFactor);
 
-        top.transform.eulerAngles = new Vector3(
-            center.transform.eulerAngles.x,
-            center.transform.eulerAngles.y,
-            center.transform.eulerAngles.z);
+        mTopObj.transform.eulerAngles = new Vector3(
+            mCenterObj.transform.eulerAngles.x,
+            mCenterObj.transform.eulerAngles.y,
+            mCenterObj.transform.eulerAngles.z);
 
         //left
-        left.transform.position = new Vector3(
-            center.transform.position.x + centerBounds.size.x,
-            center.transform.position.y - topBounds.size.y,
-            center.transform.position.z + doorFloatFactor);
+        mLeftObj.transform.position = new Vector3(
+            mCenterObj.transform.position.x + centerBounds.size.x,
+            mCenterObj.transform.position.y - topBounds.size.y,
+            mCenterObj.transform.position.z + doorFloatFactor);
 
-        left.transform.eulerAngles = new Vector3(
-            center.transform.eulerAngles.x,
-            center.transform.eulerAngles.y,
-            center.transform.eulerAngles.z);
+        mLeftObj.transform.eulerAngles = new Vector3(
+            mCenterObj.transform.eulerAngles.x,
+            mCenterObj.transform.eulerAngles.y,
+            mCenterObj.transform.eulerAngles.z);
 
         //bottom
-        bottom.transform.position = new Vector3(
-            center.transform.position.x,
-            center.transform.position.y - topBounds.size.y,
-            center.transform.position.z + doorFloatFactor);
+        mBottomObj.transform.position = new Vector3(
+            mCenterObj.transform.position.x,
+            mCenterObj.transform.position.y - topBounds.size.y,
+            mCenterObj.transform.position.z + doorFloatFactor);
 
-        bottom.transform.eulerAngles = new Vector3(
-            center.transform.eulerAngles.x,
-            center.transform.eulerAngles.y,
-            center.transform.eulerAngles.z);
+        mBottomObj.transform.eulerAngles = new Vector3(
+            mCenterObj.transform.eulerAngles.x,
+            mCenterObj.transform.eulerAngles.y,
+            mCenterObj.transform.eulerAngles.z);
 
         //back
-        body.transform.position = new Vector3(
-            center.transform.position.x - rightBounds.size.x,
-            center.transform.position.y - rightBounds.size.x,
-            center.transform.position.z - bodyBounds.size.z);
+        mBodyObj.transform.position = new Vector3(
+            mCenterObj.transform.position.x - rightBounds.size.x,
+            mCenterObj.transform.position.y - rightBounds.size.x,
+            mCenterObj.transform.position.z - bodyBounds.size.z);
 
-        body.transform.eulerAngles = new Vector3(
-            center.transform.eulerAngles.x,
-            center.transform.eulerAngles.y,
-            center.transform.eulerAngles.z);
+        mBodyObj.transform.eulerAngles = new Vector3(
+            mCenterObj.transform.eulerAngles.x,
+            mCenterObj.transform.eulerAngles.y,
+            mCenterObj.transform.eulerAngles.z);
 
         //center
-        center.transform.position = new Vector3(
-            center.transform.position.x,
-            center.transform.position.y,
-            center.transform.position.z + doorFloatFactor);
+        mCenterObj.transform.position = new Vector3(
+            mCenterObj.transform.position.x,
+            mCenterObj.transform.position.y,
+            mCenterObj.transform.position.z + doorFloatFactor);
     }
 }
 

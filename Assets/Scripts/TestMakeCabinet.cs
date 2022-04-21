@@ -6,7 +6,7 @@ using static ProbuilderUtility;
 /// <summary>
 /// Creates Procedural Door objects.
 /// </summary>
-public class TestMakeDoor : MonoBehaviour
+public class TestMakeCabinet : MonoBehaviour
 {
     [Header("Dimensions get converted from Unity units (m) to feet.")]
     public float width;
@@ -15,8 +15,8 @@ public class TestMakeDoor : MonoBehaviour
     public float railDepth = .04f;
     public float cabinetDepth = .02f;
     public float centerDepth = .02f;
-    public int numberOfObjects;
-    public GameObject doorObject;
+    public int numberOfCabinets = 1;
+    public GameObject cabinetObject;
     public Material material;
     public bool useRandomDimensions;
 
@@ -26,7 +26,7 @@ public class TestMakeDoor : MonoBehaviour
         sw.Start();
 
         //Make all the doors.
-        for (int i = 0; i < numberOfObjects; i++)
+        for (int i = 0; i < numberOfCabinets; i++)
         {
             //Determine if we want to use randomly assigned dimensions.
             if (useRandomDimensions)
@@ -36,15 +36,14 @@ public class TestMakeDoor : MonoBehaviour
             }
 
             //Make the door.
-            GameObject gameObject = new GameObject("ProBuilderDoor-" + i);
-            ProbuilderCabinetWithShakerDoor door = gameObject.AddComponent<ProbuilderCabinetWithShakerDoor>();
-            door.Init(width, height, cabinetDepth, railWidth, railDepth, centerDepth, HandlePlacement.Middle, DoorOpenDirection.Left, material, gameObject);
-            gameObject.transform.position = doorObject.transform.position;
-            door.MakeDoor();
-            
+            GameObject gameObject = new GameObject("ProBuilderCabinet-" + i);
+            ProbuilderCabinetWithShakerDoor cabinet = gameObject.AddComponent<ProbuilderCabinetWithShakerDoor>();
+            cabinet.Init(width, height, cabinetDepth, railWidth, railDepth, centerDepth, HandlePlacement.Middle, DoorOpenDirection.Left, material, gameObject);
+            gameObject.transform.position = cabinetObject.transform.position;
+            cabinet.MakeShape();
         }
 
         sw.Stop();
-        Debug.Log($"Drew {numberOfObjects} door(s): {sw.ElapsedMilliseconds}ms");
+        Debug.Log($"Drew {numberOfCabinets} door(s): {sw.ElapsedMilliseconds}ms");
     }
 }
