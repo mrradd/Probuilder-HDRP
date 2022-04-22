@@ -9,17 +9,17 @@ using UnityEngine.ProBuilder.MeshOperations;
 /// </summary>
 public class ProbuilderUtility
 {
-    public enum DoorOpenDirection
-    {
-        Left,
-        Right
-    }
-
     public enum HandlePlacement
     {
         Top,
         Middle,
         Bottom,
+    }
+
+    public enum DoorOpenDirection
+    {
+        Left,
+        Right
     }
 
     public enum Side
@@ -64,7 +64,16 @@ public class ProbuilderUtility
         }
 
         return combinedMeshes;
+
+        //foreach (ProBuilderMesh mesh in meshes)
+        //{
+        //    mesh.transform.parent = parentObj.transform;
+        //    mesh.transform.position = parentObj.transform.position;
+        //}
+
+        //return meshes;
     }
+
 
     /// <summary>
     /// Creates a poly shape with the passed in data. It also extrudes the mesh and applies a material to it.

@@ -15,6 +15,7 @@ public class TestMakeCabinet : MonoBehaviour
     public float railDepth = .04f;
     public float cabinetDepth = .02f;
     public float centerDepth = .02f;
+    public bool useHandle = true;
     public int numberOfCabinets = 1;
     public GameObject cabinetObject;
     public Material material;
@@ -38,7 +39,7 @@ public class TestMakeCabinet : MonoBehaviour
             //Make the door.
             GameObject gameObject = new GameObject("ProBuilderCabinet-" + i);
             ProbuilderCabinetWithShakerDoor cabinet = gameObject.AddComponent<ProbuilderCabinetWithShakerDoor>();
-            cabinet.Init(width, height, cabinetDepth, railWidth, railDepth, centerDepth, HandlePlacement.Middle, DoorOpenDirection.Left, material, gameObject);
+            cabinet.Init(width, height, cabinetDepth, railWidth, railDepth, centerDepth, useHandle, HandlePlacement.Bottom, DoorOpenDirection.Left, material, gameObject);
             gameObject.transform.position = cabinetObject.transform.position;
             cabinet.MakeShape();
         }

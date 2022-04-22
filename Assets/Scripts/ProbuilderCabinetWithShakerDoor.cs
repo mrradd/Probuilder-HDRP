@@ -1,5 +1,4 @@
-﻿
-using Assets.Scripts;
+﻿using Assets.Scripts;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +7,7 @@ using UnityEngine.ProBuilder.MeshOperations;
 using static ProbuilderUtility;
 
 /// <summary>
-/// Builds a basic cabinet with a shaker door with a center and 4 rails (left, right, top, bottom) using Probuilder.
+/// Builds a basic cabinet with a body, and a shaker door with a center and 4 rails (left, right, top, bottom) using Probuilder.
 /// </summary>
 public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
 {
@@ -20,22 +19,23 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
 
     protected float mCenterWidth = 0f;
     protected float mCenterHeight = 0f;
+    protected bool mUseHandle = true;
+    protected float mWidth;
+    protected float mHeight;
+    protected float mRailWidth;
+    protected float mRailDepth;
+    protected float mCenterDepth;
+    protected float mCabinetDepth;
+    
     protected HandlePlacement mHandlePlacement;
     protected DoorOpenDirection mDoorOpenDirection;
+    protected Material mMaterial;
+    protected GameObject mParent;
 
     protected List<Vector3> mCenterShapePoints = new List<Vector3>();
     protected List<Vector3> mLeftRightRailPoints = new List<Vector3>();
     protected List<Vector3> mTopBottomRailPoints = new List<Vector3>();
     protected List<Vector3> mBodyShapePoints = new List<Vector3>();
-
-    protected float mWidth;
-    protected float mHeight;
-    protected float mRailWidth;
-    protected Material mMaterial;
-    protected GameObject mParent;
-    protected float mRailDepth;
-    protected float mCenterDepth;
-    protected float mCabinetDepth;
 
     protected GameObject mCenterObj;
     protected GameObject mRightObj;
@@ -62,24 +62,27 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
     /// <param name="railWidth">Width each rail should be.</param>
     /// <param name="railDepth">Depth (z-axis) each rail should be.</param>
     /// <param name="centerDepth">Depth (z-axis) the center should be.</param>
+    /// <param name="useHandle">TRUE=attaches handles to the cabinet. FALSE=attaches knobs to the cabinet.</param>
     /// <param name="handlePlacement">Denotes where the placement of the handle should be.</param>
     /// <param name="doorOpenDirection">The direction the door would open.</param>
     /// <param name="material">Material of the cabinet</param>
     /// <param name="parent">Parent object anchor to.</param>
-    public virtual void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, HandlePlacement handlePlacement, DoorOpenDirection doorOpenDirection, Material material, GameObject parent)
+    public virtual void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, bool useHandle,
+        HandlePlacement handlePlacement, DoorOpenDirection doorOpenDirection, Material material, GameObject parent)
     {
-        this.mParent = parent;
-        this.mWidth = width / Constants.FeetInAMeter;
-        this.mHeight = height / Constants.FeetInAMeter;
-        this.mMaterial = material;
-        this.mRailWidth = railWidth / Constants.FeetInAMeter;
-        this.mCenterDepth = centerDepth / Constants.FeetInAMeter;
-        this.mRailDepth = railDepth / Constants.FeetInAMeter;
-        this.mCabinetDepth = cabinetDepth / Constants.FeetInAMeter;
-        this.mHandlePlacement = handlePlacement;
-        this.mDoorOpenDirection = doorOpenDirection;
-        mCenterWidth = this.mWidth - this.mRailWidth * 2;
-        mCenterHeight = this.mHeight - this.mRailWidth * 2;
+        mParent = parent;
+        mWidth = width / Constants.FeetInAMeter;
+        mHeight = height / Constants.FeetInAMeter;
+        mMaterial = material;
+        mRailWidth = railWidth / Constants.FeetInAMeter;
+        mCenterDepth = centerDepth / Constants.FeetInAMeter;
+        mRailDepth = railDepth / Constants.FeetInAMeter;
+        mCabinetDepth = cabinetDepth / Constants.FeetInAMeter;
+        mHandlePlacement = handlePlacement;
+        mDoorOpenDirection = doorOpenDirection;
+        mUseHandle = useHandle;
+        mCenterWidth = mWidth - mRailWidth * 2;
+        mCenterHeight = mHeight - mRailWidth * 2;
     }
 
     /// <summary>
@@ -126,13 +129,18 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         mTopBottomRailPoints.Add(new Vector3(0, 0, 0));
     }
 
+    protected virtual GameObject MakeKnob()
+    {
+        return ProbuilderUtility.GenerateCube(new Vector3(.05f, .05f, .05f), mMaterial, "Knob");
+    }
+
     /// <summary>
     /// Makes a handle.
     /// </summary>
     /// <returns>GameObject for the handle.</returns>
     protected virtual GameObject MakeHandle()
     {
-        return ProbuilderUtility.GenerateCube(new Vector3(.02f, .1f, .05f), mMaterial, "Handle");
+        return ProbuilderUtility.GenerateCube(new Vector3(.00952f, .14605f, .0349f), mMaterial, "Handle");
     }
 
     /// <summary>
@@ -146,7 +154,7 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         InitBodyShapePoints();
 
         GameObject proBuilderParentObj = new GameObject();
-        proBuilderParentObj.transform.name = "TEST";//TODO CH  TESTING
+        proBuilderParentObj.transform.name = "Cabinet";
 
         //Build each object for each side. 
         mCenterObj = ProbuilderUtility.CreateShapeFromPolygon(mCenterDepth, mCenterShapePoints, mMaterial, ProbuilderUtility.Side.Center.ToString());
@@ -155,7 +163,7 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         mTopObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mTopBottomRailPoints, mMaterial, ProbuilderUtility.Side.Top.ToString());
         mBottomObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mTopBottomRailPoints, mMaterial, ProbuilderUtility.Side.Bottom.ToString());
         mBodyObj = ProbuilderUtility.CreateShapeFromPolygon(mCabinetDepth - mRailDepth, mBodyShapePoints, mMaterial, ProbuilderUtility.Side.Body.ToString());
-        mHandleObj = MakeHandle();
+        mHandleObj = mUseHandle ? MakeHandle() : MakeKnob();
 
         mCenterObj.transform.position = proBuilderParentObj.transform.position;
 
@@ -193,13 +201,13 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         ProbuilderUtility.RefreshMeshes(meshes);
 
         //Clean up the unneeded objects.
-        DestroyImmediate(mCenterObj);
-        DestroyImmediate(mTopObj);
-        DestroyImmediate(mLeftObj);
-        DestroyImmediate(mBottomObj);
-        DestroyImmediate(mRightObj);
-        DestroyImmediate(mBodyObj);
-        DestroyImmediate(mHandleObj);
+        //DestroyImmediate(mCenterObj);
+        //DestroyImmediate(mTopObj);
+        //DestroyImmediate(mLeftObj);
+        //DestroyImmediate(mBottomObj);
+        //DestroyImmediate(mRightObj);
+        //DestroyImmediate(mBodyObj);
+        //DestroyImmediate(mHandleObj);
 
         proBuilderParentObj.transform.parent = mParent.transform;
         proBuilderParentObj.transform.eulerAngles = new Vector3(mParent.transform.eulerAngles.x, mParent.transform.eulerAngles.y, mParent.transform.eulerAngles.z);
@@ -208,6 +216,7 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
 
     /// <summary>
     /// Places the handle in the appropriate spot on the door; either the left or right side, and either in the top, middle, or bottom of the cabinet door.
+    /// Handle pivot points are dead center in the object.
     /// </summary>
     protected virtual void PlaceHandle()
     {
@@ -227,19 +236,50 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         railBounds = ProbuilderUtility.GetTotalMeshFilterBounds(rail.transform);
 
         float xWithOffset = rail.transform.position.x + railBounds.size.x / 2;
-        Bounds handleBounds = ProbuilderUtility.GetTotalMeshFilterBounds(rail.transform);
-        
+        Bounds handleBounds = ProbuilderUtility.GetTotalMeshFilterBounds(mHandleObj.transform);
+
+        //Handle is resting just below the top rail.
         if (mHandlePlacement == ProbuilderUtility.HandlePlacement.Top)
         {
-            mHandleObj.transform.position = new Vector3(xWithOffset, railBounds.size.y - railBounds.size.y / 3, rail.transform.position.z);
+            //Handle
+            if (mUseHandle)
+            {
+                mHandleObj.transform.position = new Vector3(xWithOffset, mCenterHeight - handleBounds.size.y / 2, rail.transform.position.z);
+            }
+
+            //Knob
+            else
+            {
+                mHandleObj.transform.position = new Vector3(xWithOffset, mCenterHeight + handleBounds.size.y / 2, rail.transform.position.z);
+            }
+            
         }
+
+        //Handle is right in the middle of the door.
         if (mHandlePlacement == ProbuilderUtility.HandlePlacement.Middle)
         {
-            mHandleObj.transform.position = new Vector3(xWithOffset, railBounds.size.y - railBounds.size.y / 4 - handleBounds.size.y / 3, rail.transform.position.z);
+            //Works for handles or knobs.
+            mHandleObj.transform.position = new Vector3(xWithOffset, railBounds.size.y - railBounds.size.y / 2 - handleBounds.size.y / 2, rail.transform.position.z);
         }
+
+        //Handle is resting just above the bottom rail.
         if (mHandlePlacement == ProbuilderUtility.HandlePlacement.Bottom)
         {
-            mHandleObj.transform.position = new Vector3(xWithOffset, rail.transform.position.y + railBounds.size.y / 4, railBounds.size.z);
+            //Handle
+            if (mUseHandle)
+            {
+                //Sometimes the handle goes slightly past the bottom rail. This is because the handle is too large for the rail, so we adjust by the difference so the handle is 
+                //resting just above the bottom rail.
+                float diffY = handleBounds.size.y - railBounds.size.y;
+                float newY = diffY > 0f ? diffY : 0;
+                mHandleObj.transform.position = new Vector3(xWithOffset, handleBounds.size.y / 2 + newY, railBounds.size.z);
+            }
+
+            //Knob
+            else
+            {
+                mHandleObj.transform.position = new Vector3(xWithOffset, 0 - handleBounds.size.y / 2, railBounds.size.z);
+            }
         }
     }
 

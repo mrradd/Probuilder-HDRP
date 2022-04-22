@@ -428,18 +428,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bef18bf5bce71d445af7cc10ca98b0ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  thing1: {fileID: 1533733508}
-  thing2: {fileID: 530046644}
-  thing3: {fileID: 621050390}
-  material: {fileID: 2100000, guid: 9b8eadc4de0544646b75ddcc43f8fd06, type: 2}
-  centerExtrusionFactorThing1: 1
-  centerExtrusionFactorThing2: 1
-  centerExtrusionFactorThing3: 1
-  draw1: 1
-  draw2: 1
-  draw3: 1
-  numberOfCopies: 1
-  childObject: {fileID: 0}
 --- !u!4 &1444573239
 Transform:
   m_ObjectHideFlags: 0
@@ -736,6 +724,7 @@ MonoBehaviour:
   railDepth: 0.04
   cabinetDepth: 0.02
   centerDepth: 0.02
+  useHandle: 1
   numberOfHandles: 1
   numberOfDrawers: 1
   drawerObject: {fileID: 1449002437}
@@ -785,12 +774,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbf70e0aad6e09f46b5473a0d0747c60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 1
-  height: 2
-  railWidth: 0.2
+  width: 2
+  height: 4
+  railWidth: 0.4
   railDepth: 0.04
   cabinetDepth: 2
   centerDepth: 0.02
+  useHandle: 0
   numberOfCabinets: 1
   cabinetObject: {fileID: 634023923}
   material: {fileID: 2100000, guid: a68228c24abfa2f4b8954d7b0148f799, type: 2}

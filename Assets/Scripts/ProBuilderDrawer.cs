@@ -8,7 +8,7 @@ using UnityEngine.ProBuilder.MeshOperations;
 using static ProbuilderUtility;
 
 /// <summary>
-/// Builds a basic drawer with a shaker door with a center and 4 rails (left, right, top, bottom) using Probuilder.
+/// Builds a basic drawer with a body, center, and 4 rails (left, right, top, bottom) using Probuilder.
 /// </summary>
 public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
 {
@@ -29,7 +29,8 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
     /// <param name="material"></param>
     /// <param name="parent"></param>
     [Obsolete("This instance of ProBuilderDrawer.Init does nothing.", true)]
-    public override void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, HandlePlacement handlePlacement, DoorOpenDirection doorOpenDirection, Material material, GameObject parent)
+    public override void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, bool useHandle,
+        HandlePlacement handlePlacement, DoorOpenDirection doorOpenDirection, Material material, GameObject parent)
     {
         throw new Exception("This instance of ProBuilderDrawer.Init does nothing. Do not use this method.");
     }
@@ -44,9 +45,11 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
     /// <param name="railDepth">Depth (z-axis) each rail should be.</param>
     /// <param name="centerDepth">Depth (z-axis) the center should be.</param>
     /// <param name="numberOfHandles">Denotes where the number of drawer handles.</param>
+    /// <param name="useHandle">TRUE=attaches handles to the drawer. FALSE=attaches knobs to the drawer.</param>
     /// <param name="material">Material of the cabinet</param>
     /// <param name="parent">Parent object anchor to.</param>
-    public void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, int numberOfHandles, Material material, GameObject parent)
+    public void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, int numberOfHandles,
+        bool useHandle, Material material, GameObject parent)
     {
         mParent = parent;
         mWidth = width / Constants.FeetInAMeter;
@@ -57,6 +60,7 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
         mRailDepth = railDepth / Constants.FeetInAMeter;
         mCabinetDepth = cabinetDepth / Constants.FeetInAMeter;
         mNumberOfHandles = numberOfHandles;
+        mUseHandle = useHandle;
 
         mCenterWidth = mWidth - mRailWidth * 2;
         mCenterHeight = mHeight - mRailWidth * 2;
@@ -68,7 +72,7 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
     /// <returns>GameObject for the handle.</returns>
     protected override GameObject MakeHandle()
     {
-        return ProbuilderUtility.GenerateCube(new Vector3(.1f, .02f, .05f), mMaterial, "Handle");
+        return ProbuilderUtility.GenerateCube(new Vector3(.146f, .00952f, .0349f), mMaterial, "Handle");
     }
 
     /// <summary>
@@ -82,7 +86,7 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
         InitBodyShapePoints();
 
         GameObject proBuilderParentObj = new GameObject();
-        proBuilderParentObj.transform.name = "TEST";//TODO CH  TESTING
+        proBuilderParentObj.transform.name = "Drawer";
 
         //Build each object for each side. 
         mCenterObj = ProbuilderUtility.CreateShapeFromPolygon(mCenterDepth, mCenterShapePoints, mMaterial, ProbuilderUtility.Side.Center.ToString());
@@ -94,7 +98,7 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
 
         for (int i = 0; i < mNumberOfHandles; i++)
         {
-            GameObject handleObj = MakeHandle();
+            GameObject handleObj = mUseHandle ? MakeHandle() : MakeKnob();
             mHandles.Add(new Handle(handleObj, handleObj.GetComponent<ProBuilderMesh>()));
         }
 
@@ -164,18 +168,21 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
         //Place one handle in the middle of the drawer's center.
         if (mNumberOfHandles > 0 && mNumberOfHandles == 1)
         {
-            mHandles[0].gameObject.transform.position = new Vector3(mCenterObj.transform.position.x + mCenterWidth/2, mCenterObj.transform.position.y + mCenterHeight/ 2, mCenterObj.transform.position.z);
+            mHandles[0].gameObject.transform.position = new Vector3(mCenterObj.transform.position.x + mCenterWidth / 2, mCenterObj.transform.position.y + mCenterHeight / 2, mCenterObj.transform.position.z);
         }
 
         //Place two handles on opposite ends in the center area of the drawer. For now we are only using the first 2 handles.
         else if (mNumberOfHandles > 0 && mNumberOfHandles == 2)
         {
             Bounds handleBounds = GetTotalMeshFilterBounds(mHandles[0].gameObject.transform);
-            mHandles[0].gameObject.transform.position = new Vector3(mCenterObj.transform.position.x + mCenterWidth - handleBounds.size.x/2, mCenterObj.transform.position.y + mCenterHeight / 2, mCenterObj.transform.position.z);
-            mHandles[1].gameObject.transform.position = new Vector3(mCenterObj.transform.position.x + handleBounds.size.x/2, mCenterObj.transform.position.y + mCenterHeight / 2, mCenterObj.transform.position.z);
+            mHandles[0].gameObject.transform.position = new Vector3(mCenterObj.transform.position.x + mCenterWidth - handleBounds.size.x / 2, mCenterObj.transform.position.y + mCenterHeight / 2, mCenterObj.transform.position.z);
+            mHandles[1].gameObject.transform.position = new Vector3(mCenterObj.transform.position.x + handleBounds.size.x / 2, mCenterObj.transform.position.y + mCenterHeight / 2, mCenterObj.transform.position.z);
         }
     }
 
+    /// <summary>
+    /// Wrapper for a handle's game object and mesh.
+    /// </summary>
     protected class Handle
     {
         public GameObject gameObject;
