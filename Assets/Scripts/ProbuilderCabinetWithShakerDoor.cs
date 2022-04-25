@@ -19,14 +19,15 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
 
     protected float mCenterWidth = 0f;
     protected float mCenterHeight = 0f;
-    protected bool mUseHandle = true;
+    protected bool mUseHandleInsteadOfKnob = true;
     protected float mWidth;
     protected float mHeight;
     protected float mRailWidth;
     protected float mRailDepth;
     protected float mCenterDepth;
     protected float mCabinetDepth;
-    
+    protected float mInsideBevelDepth;
+
     protected HandlePlacement mHandlePlacement;
     protected DoorOpenDirection mDoorOpenDirection;
     protected Material mMaterial;
@@ -54,20 +55,36 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
     protected ProBuilderMesh mHandleMesh;
 
     /// <summary>
+    /// Bevels the inside edges of the rails which are closest to the center part.
+    /// </summary>
+    protected void BevelInsideEdges()
+    {
+        if (mInsideBevelDepth > 0f)
+        {
+            //Bevel the edges.
+            ProbuilderUtility.BevelEdge(mBottomMesh, 2, 1, mInsideBevelDepth);
+            ProbuilderUtility.BevelEdge(mRightMesh, 5, 2, mInsideBevelDepth);
+            ProbuilderUtility.BevelEdge(mLeftMesh, 2, 1, mInsideBevelDepth);
+            ProbuilderUtility.BevelEdge(mTopMesh, 5, 2, mInsideBevelDepth);
+        }
+    }
+
+    /// <summary>
     /// Initialize the shape. Converts dimensions from meters to feet.
     /// </summary>
     /// <param name="width">Total width of the door.</param>
     /// <param name="height">Total height of the door.</param>
+    /// <param name="insideBevelDepth">Amount to bevel the inside edges of the rails.</param>
     /// <param name="cabinetDepth">Depth of the cabinet we are attaching the door to.</param>
     /// <param name="railWidth">Width each rail should be.</param>
     /// <param name="railDepth">Depth (z-axis) each rail should be.</param>
     /// <param name="centerDepth">Depth (z-axis) the center should be.</param>
-    /// <param name="useHandle">TRUE=attaches handles to the cabinet. FALSE=attaches knobs to the cabinet.</param>
+    /// <param name="useHandleInsteadOfKnob">TRUE=attaches handles to the cabinet. FALSE=attaches knobs to the cabinet.</param>
     /// <param name="handlePlacement">Denotes where the placement of the handle should be.</param>
     /// <param name="doorOpenDirection">The direction the door would open.</param>
     /// <param name="material">Material of the cabinet</param>
     /// <param name="parent">Parent object anchor to.</param>
-    public virtual void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, bool useHandle,
+    public virtual void Init(float width, float height, float insideBevelDepth, float cabinetDepth, float railWidth, float railDepth, float centerDepth, bool useHandleInsteadOfKnob,
         HandlePlacement handlePlacement, DoorOpenDirection doorOpenDirection, Material material, GameObject parent)
     {
         mParent = parent;
@@ -80,7 +97,8 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         mCabinetDepth = cabinetDepth / Constants.FeetInAMeter;
         mHandlePlacement = handlePlacement;
         mDoorOpenDirection = doorOpenDirection;
-        mUseHandle = useHandle;
+        mUseHandleInsteadOfKnob = useHandleInsteadOfKnob;
+        mInsideBevelDepth = insideBevelDepth / Constants.FeetInAMeter;
         mCenterWidth = mWidth - mRailWidth * 2;
         mCenterHeight = mHeight - mRailWidth * 2;
     }
@@ -163,7 +181,7 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         mTopObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mTopBottomRailPoints, mMaterial, ProbuilderUtility.Side.Top.ToString());
         mBottomObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mTopBottomRailPoints, mMaterial, ProbuilderUtility.Side.Bottom.ToString());
         mBodyObj = ProbuilderUtility.CreateShapeFromPolygon(mCabinetDepth - mRailDepth, mBodyShapePoints, mMaterial, ProbuilderUtility.Side.Body.ToString());
-        mHandleObj = mUseHandle ? MakeHandle() : MakeKnob();
+        mHandleObj = mUseHandleInsteadOfKnob ? MakeHandle() : MakeKnob();
 
         mCenterObj.transform.position = proBuilderParentObj.transform.position;
 
@@ -180,11 +198,8 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         mBodyMesh = mBodyObj.GetComponent<ProBuilderMesh>();
         mHandleMesh = mHandleObj.GetComponent<ProBuilderMesh>();
 
-        //Bevel the edges.
-        //ProceduralDoorUtility.bevelEdge(bottomMesh, 2, 1, .062f);
-        //ProceduralDoorUtility.bevelEdge(rightMesh, 5, 2, .062f);
-        //ProceduralDoorUtility.bevelEdge(leftMesh, 2, 1, .062f);
-        //ProceduralDoorUtility.bevelEdge(topMesh, 5, 2, .062f);
+        //Bevel the inside edges of the rails.
+        BevelInsideEdges();
 
         //Rotate the right and left side UVs so they are oriented properly.
         ProbuilderUtility.RotateUVs90(mRightMesh, true);
@@ -201,13 +216,13 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         ProbuilderUtility.RefreshMeshes(meshes);
 
         //Clean up the unneeded objects.
-        //DestroyImmediate(mCenterObj);
-        //DestroyImmediate(mTopObj);
-        //DestroyImmediate(mLeftObj);
-        //DestroyImmediate(mBottomObj);
-        //DestroyImmediate(mRightObj);
-        //DestroyImmediate(mBodyObj);
-        //DestroyImmediate(mHandleObj);
+        DestroyImmediate(mCenterObj);
+        DestroyImmediate(mTopObj);
+        DestroyImmediate(mLeftObj);
+        DestroyImmediate(mBottomObj);
+        DestroyImmediate(mRightObj);
+        DestroyImmediate(mBodyObj);
+        DestroyImmediate(mHandleObj);
 
         proBuilderParentObj.transform.parent = mParent.transform;
         proBuilderParentObj.transform.eulerAngles = new Vector3(mParent.transform.eulerAngles.x, mParent.transform.eulerAngles.y, mParent.transform.eulerAngles.z);
@@ -242,7 +257,7 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         if (mHandlePlacement == ProbuilderUtility.HandlePlacement.Top)
         {
             //Handle
-            if (mUseHandle)
+            if (mUseHandleInsteadOfKnob)
             {
                 mHandleObj.transform.position = new Vector3(xWithOffset, mCenterHeight - handleBounds.size.y / 2, rail.transform.position.z);
             }
@@ -266,7 +281,7 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         if (mHandlePlacement == ProbuilderUtility.HandlePlacement.Bottom)
         {
             //Handle
-            if (mUseHandle)
+            if (mUseHandleInsteadOfKnob)
             {
                 //Sometimes the handle goes slightly past the bottom rail. This is because the handle is too large for the rail, so we adjust by the difference so the handle is 
                 //resting just above the bottom rail.

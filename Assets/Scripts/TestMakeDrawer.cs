@@ -7,6 +7,7 @@ public class TestMakeDrawer : MonoBehaviour
     [Header("Dimensions get converted from Unity units (m) to feet.")]
     public float width;
     public float height;
+    public float insideBevelDepth;
     public float railWidth = 2.5f;
     public float railDepth = .04f;
     public float cabinetDepth = .02f;
@@ -36,7 +37,7 @@ public class TestMakeDrawer : MonoBehaviour
             //Make the door.
             GameObject gameObject = new GameObject("ProBuilderDrawer-" + i);
             ProBuilderDrawer drawer = gameObject.AddComponent<ProBuilderDrawer>();
-            drawer.Init(width, height, cabinetDepth, railWidth, railDepth, centerDepth, numberOfHandles, useHandle, material, gameObject);
+            drawer.Init(width, height, insideBevelDepth, cabinetDepth, railWidth, railDepth, centerDepth, numberOfHandles, useHandle, material, gameObject);
             gameObject.transform.position = drawerObject.transform.position;
             drawer.MakeShape();
 

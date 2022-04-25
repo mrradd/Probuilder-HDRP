@@ -18,18 +18,20 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
     /// <summary>
     /// This instance of the Init function should not be used for the class ProBuilderDrawer. This function throws an exception.
     /// </summary>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
-    /// <param name="cabinetDepth"></param>
-    /// <param name="railWidth"></param>
-    /// <param name="railDepth"></param>
-    /// <param name="centerDepth"></param>
-    /// <param name="handlePlacement"></param>
-    /// <param name="doorOpenDirection"></param>
-    /// <param name="material"></param>
-    /// <param name="parent"></param>
+    /// <param name="width">Total width of the door.</param>
+    /// <param name="height">Total height of the door.</param>
+    /// <param name="insideBevelDepth">Amount to bevel the inside edges of the rails.</param>
+    /// <param name="cabinetDepth">Depth of the cabinet we are attaching the door to.</param>
+    /// <param name="railWidth">Width each rail should be.</param>
+    /// <param name="railDepth">Depth (z-axis) each rail should be.</param>
+    /// <param name="centerDepth">Depth (z-axis) the center should be.</param>
+    /// <param name="useHandleInsteadOfKnob">TRUE=attaches handles to the cabinet. FALSE=attaches knobs to the cabinet.</param>
+    /// <param name="handlePlacement">Denotes where the placement of the handle should be.</param>
+    /// <param name="doorOpenDirection">The direction the door would open.</param>
+    /// <param name="material">Material of the cabinet</param>
+    /// <param name="parent">Parent object anchor to.</param>
     [Obsolete("This instance of ProBuilderDrawer.Init does nothing.", true)]
-    public override void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, bool useHandle,
+    public virtual void Init(float width, float height, float insideBevelDepth, float cabinetDepth, float railWidth, float railDepth, float centerDepth, bool useHandleInsteadOfKnob,
         HandlePlacement handlePlacement, DoorOpenDirection doorOpenDirection, Material material, GameObject parent)
     {
         throw new Exception("This instance of ProBuilderDrawer.Init does nothing. Do not use this method.");
@@ -40,16 +42,17 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
     /// </summary>
     /// <param name="width">Total width of the door.</param>
     /// <param name="height">Total height of the door.</param>
+    /// <param name="insideBevelDepth">Amount to bevel the inside edges of the rails.</param>
     /// <param name="cabinetDepth">Depth of the cabinet we are attaching the door to.</param>
     /// <param name="railWidth">Width each rail should be.</param>
     /// <param name="railDepth">Depth (z-axis) each rail should be.</param>
     /// <param name="centerDepth">Depth (z-axis) the center should be.</param>
     /// <param name="numberOfHandles">Denotes where the number of drawer handles.</param>
-    /// <param name="useHandle">TRUE=attaches handles to the drawer. FALSE=attaches knobs to the drawer.</param>
+    /// <param name="useHandleInsteadOfKnob">TRUE=attaches handles to the drawer. FALSE=attaches knobs to the drawer.</param>
     /// <param name="material">Material of the cabinet</param>
     /// <param name="parent">Parent object anchor to.</param>
-    public void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, int numberOfHandles,
-        bool useHandle, Material material, GameObject parent)
+    public void Init(float width, float height, float insideBevelDepth, float cabinetDepth, float railWidth, float railDepth, float centerDepth, int numberOfHandles,
+        bool useHandleInsteadOfKnob, Material material, GameObject parent)
     {
         mParent = parent;
         mWidth = width / Constants.FeetInAMeter;
@@ -60,7 +63,8 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
         mRailDepth = railDepth / Constants.FeetInAMeter;
         mCabinetDepth = cabinetDepth / Constants.FeetInAMeter;
         mNumberOfHandles = numberOfHandles;
-        mUseHandle = useHandle;
+        mUseHandleInsteadOfKnob = useHandleInsteadOfKnob;
+        mInsideBevelDepth = insideBevelDepth / Constants.FeetInAMeter;
 
         mCenterWidth = mWidth - mRailWidth * 2;
         mCenterHeight = mHeight - mRailWidth * 2;
@@ -98,7 +102,7 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
 
         for (int i = 0; i < mNumberOfHandles; i++)
         {
-            GameObject handleObj = mUseHandle ? MakeHandle() : MakeKnob();
+            GameObject handleObj = mUseHandleInsteadOfKnob ? MakeHandle() : MakeKnob();
             mHandles.Add(new Handle(handleObj, handleObj.GetComponent<ProBuilderMesh>()));
         }
 
@@ -116,11 +120,10 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
         mCenterMesh = mCenterObj.GetComponent<ProBuilderMesh>();
         mBodyMesh = mBodyObj.GetComponent<ProBuilderMesh>();
 
-        //Bevel the edges.
-        //ProceduralDoorUtility.bevelEdge(bottomMesh, 2, 1, .062f);
-        //ProceduralDoorUtility.bevelEdge(rightMesh, 5, 2, .062f);
-        //ProceduralDoorUtility.bevelEdge(leftMesh, 2, 1, .062f);
-        //ProceduralDoorUtility.bevelEdge(topMesh, 5, 2, .062f);
+        
+
+        //Bevel the inside edges of the rails.
+        //BevelInsideEdges();
 
         //Rotate the right and left side UVs so they are oriented properly.
         ProbuilderUtility.RotateUVs90(mRightMesh, true);
