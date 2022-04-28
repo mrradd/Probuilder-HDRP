@@ -10,7 +10,7 @@ using static ProbuilderUtility;
 /// <summary>
 /// Builds a basic drawer with a body, center, and 4 rails (left, right, top, bottom) using Probuilder.
 /// </summary>
-public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
+public class ProBuilderDrawer : ProBuilderCabinetWithShakerDoor
 {
     protected int mNumberOfHandles;
     protected List<Handle> mHandles = new List<Handle>();
@@ -20,7 +20,6 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
     /// </summary>
     /// <param name="width">Total width of the door.</param>
     /// <param name="height">Total height of the door.</param>
-    /// <param name="insideBevelDepth">Amount to bevel the inside edges of the rails.</param>
     /// <param name="cabinetDepth">Depth of the cabinet we are attaching the door to.</param>
     /// <param name="railWidth">Width each rail should be.</param>
     /// <param name="railDepth">Depth (z-axis) each rail should be.</param>
@@ -31,7 +30,7 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
     /// <param name="material">Material of the cabinet</param>
     /// <param name="parent">Parent object anchor to.</param>
     [Obsolete("This instance of ProBuilderDrawer.Init does nothing.", true)]
-    public virtual void Init(float width, float height, float insideBevelDepth, float cabinetDepth, float railWidth, float railDepth, float centerDepth, bool useHandleInsteadOfKnob,
+    public override void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, bool useHandleInsteadOfKnob,
         HandlePlacement handlePlacement, DoorOpenDirection doorOpenDirection, Material material, GameObject parent)
     {
         throw new Exception("This instance of ProBuilderDrawer.Init does nothing. Do not use this method.");
@@ -42,7 +41,6 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
     /// </summary>
     /// <param name="width">Total width of the door.</param>
     /// <param name="height">Total height of the door.</param>
-    /// <param name="insideBevelDepth">Amount to bevel the inside edges of the rails.</param>
     /// <param name="cabinetDepth">Depth of the cabinet we are attaching the door to.</param>
     /// <param name="railWidth">Width each rail should be.</param>
     /// <param name="railDepth">Depth (z-axis) each rail should be.</param>
@@ -51,7 +49,7 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
     /// <param name="useHandleInsteadOfKnob">TRUE=attaches handles to the drawer. FALSE=attaches knobs to the drawer.</param>
     /// <param name="material">Material of the cabinet</param>
     /// <param name="parent">Parent object anchor to.</param>
-    public void Init(float width, float height, float insideBevelDepth, float cabinetDepth, float railWidth, float railDepth, float centerDepth, int numberOfHandles,
+    public void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, int numberOfHandles,
         bool useHandleInsteadOfKnob, Material material, GameObject parent)
     {
         mParent = parent;
@@ -64,7 +62,6 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
         mCabinetDepth = cabinetDepth / Constants.FeetInAMeter;
         mNumberOfHandles = numberOfHandles;
         mUseHandleInsteadOfKnob = useHandleInsteadOfKnob;
-        mInsideBevelDepth = insideBevelDepth / Constants.FeetInAMeter;
 
         mCenterWidth = mWidth - mRailWidth * 2;
         mCenterHeight = mHeight - mRailWidth * 2;
@@ -103,10 +100,18 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
         for (int i = 0; i < mNumberOfHandles; i++)
         {
             GameObject handleObj = mUseHandleInsteadOfKnob ? MakeHandle() : MakeKnob();
+            handleObj.transform.parent = proBuilderParentObj.transform;
             mHandles.Add(new Handle(handleObj, handleObj.GetComponent<ProBuilderMesh>()));
         }
 
         mCenterObj.transform.position = proBuilderParentObj.transform.position;
+
+        mCenterObj.transform.parent = proBuilderParentObj.transform;
+        mRightObj.transform.parent = proBuilderParentObj.transform;
+        mLeftObj.transform.parent = proBuilderParentObj.transform;
+        mTopObj.transform.parent = proBuilderParentObj.transform;
+        mBottomObj.transform.parent = proBuilderParentObj.transform;
+        mBodyObj.transform.parent = proBuilderParentObj.transform;
 
         //Put all the pieces together into a cabinet shape.
         PlaceParts();
@@ -119,11 +124,6 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
         mTopMesh = mTopObj.GetComponent<ProBuilderMesh>();
         mCenterMesh = mCenterObj.GetComponent<ProBuilderMesh>();
         mBodyMesh = mBodyObj.GetComponent<ProBuilderMesh>();
-
-        
-
-        //Bevel the inside edges of the rails.
-        //BevelInsideEdges();
 
         //Rotate the right and left side UVs so they are oriented properly.
         ProbuilderUtility.RotateUVs90(mRightMesh, true);
@@ -140,23 +140,25 @@ public class ProBuilderDrawer : ProbuilderCabinetWithShakerDoor
         }
 
         meshes.AddRange(new List<ProBuilderMesh> { mCenterMesh, mTopMesh, mLeftMesh, mBottomMesh, mRightMesh, mBodyMesh });
-        ProbuilderUtility.CombineAllMeshes(proBuilderParentObj, meshes);
+        
+        //Uncomment this to combine all meshes.
+        //ProbuilderUtility.CombineAllMeshes(proBuilderParentObj, meshes);
 
         //Refresh the meshes so everything is synced up.
         ProbuilderUtility.RefreshMeshes(meshes);
 
         //Clean up the unneeded objects.
-        DestroyImmediate(mCenterObj);
-        DestroyImmediate(mTopObj);
-        DestroyImmediate(mLeftObj);
-        DestroyImmediate(mBottomObj);
-        DestroyImmediate(mRightObj);
-        DestroyImmediate(mBodyObj);
+        //DestroyImmediate(mCenterObj);
+        //DestroyImmediate(mTopObj);
+        //DestroyImmediate(mLeftObj);
+        //DestroyImmediate(mBottomObj);
+        //DestroyImmediate(mRightObj);
+        //DestroyImmediate(mBodyObj);
 
-        foreach (Handle h in mHandles)
-        {
-            DestroyImmediate(h.gameObject);
-        }
+        //foreach (Handle h in mHandles)
+        //{
+        //    DestroyImmediate(h.gameObject);
+        //}
 
         proBuilderParentObj.transform.parent = mParent.transform;
         proBuilderParentObj.transform.eulerAngles = new Vector3(mParent.transform.eulerAngles.x, mParent.transform.eulerAngles.y, mParent.transform.eulerAngles.z);

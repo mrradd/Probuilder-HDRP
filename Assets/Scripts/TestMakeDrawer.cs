@@ -12,13 +12,13 @@ public class TestMakeDrawer : MonoBehaviour
     public float railDepth = .04f;
     public float cabinetDepth = .02f;
     public float centerDepth = .02f;
-    public bool useHandle = true;
+    public bool useHandleInsteadOfKnobs = true;
     public int numberOfHandles = 1;
     public int numberOfDrawers = 1;
     public GameObject drawerObject;
     public Material material;
     public bool useRandomDimensions;
-
+    
     private void Awake()
     {
         System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
@@ -37,7 +37,7 @@ public class TestMakeDrawer : MonoBehaviour
             //Make the door.
             GameObject gameObject = new GameObject("ProBuilderDrawer-" + i);
             ProBuilderDrawer drawer = gameObject.AddComponent<ProBuilderDrawer>();
-            drawer.Init(width, height, insideBevelDepth, cabinetDepth, railWidth, railDepth, centerDepth, numberOfHandles, useHandle, material, gameObject);
+            drawer.Init(width, height, cabinetDepth, railWidth, railDepth, centerDepth, numberOfHandles, useHandleInsteadOfKnobs, material, gameObject);
             gameObject.transform.position = drawerObject.transform.position;
             drawer.MakeShape();
 

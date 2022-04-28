@@ -720,11 +720,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 2
   height: 1
+  insideBevelDepth: 0
   railWidth: 0.2
   railDepth: 0.04
-  cabinetDepth: 0.02
+  cabinetDepth: 1
   centerDepth: 0.02
-  useHandle: 0
+  useHandleInsteadOfKnobs: 1
   numberOfHandles: 2
   numberOfDrawers: 1
   drawerObject: {fileID: 1449002437}
@@ -776,6 +777,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 2
   height: 4
+  insideBevelDepth: 0
   railWidth: 0.4
   railDepth: 0.04
   cabinetDepth: 2

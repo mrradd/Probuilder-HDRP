@@ -9,7 +9,7 @@ using static ProbuilderUtility;
 /// <summary>
 /// Builds a basic cabinet with a body, and a shaker door with a center and 4 rails (left, right, top, bottom) using Probuilder.
 /// </summary>
-public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
+public class ProBuilderCabinetWithShakerDoor : MonoBehaviour
 {
     /**
      * TODO CH  For some reason the X value of the pivot points of the imported models is slightly off by this much. This will
@@ -26,7 +26,6 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
     protected float mRailDepth;
     protected float mCenterDepth;
     protected float mCabinetDepth;
-    protected float mInsideBevelDepth;
 
     protected HandlePlacement mHandlePlacement;
     protected DoorOpenDirection mDoorOpenDirection;
@@ -55,26 +54,10 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
     protected ProBuilderMesh mHandleMesh;
 
     /// <summary>
-    /// Bevels the inside edges of the rails which are closest to the center part.
-    /// </summary>
-    protected void BevelInsideEdges()
-    {
-        if (mInsideBevelDepth > 0f)
-        {
-            //Bevel the edges.
-            ProbuilderUtility.BevelEdge(mBottomMesh, 2, 1, mInsideBevelDepth);
-            ProbuilderUtility.BevelEdge(mRightMesh, 5, 2, mInsideBevelDepth);
-            ProbuilderUtility.BevelEdge(mLeftMesh, 2, 1, mInsideBevelDepth);
-            ProbuilderUtility.BevelEdge(mTopMesh, 5, 2, mInsideBevelDepth);
-        }
-    }
-
-    /// <summary>
     /// Initialize the shape. Converts dimensions from meters to feet.
     /// </summary>
     /// <param name="width">Total width of the door.</param>
     /// <param name="height">Total height of the door.</param>
-    /// <param name="insideBevelDepth">Amount to bevel the inside edges of the rails.</param>
     /// <param name="cabinetDepth">Depth of the cabinet we are attaching the door to.</param>
     /// <param name="railWidth">Width each rail should be.</param>
     /// <param name="railDepth">Depth (z-axis) each rail should be.</param>
@@ -84,7 +67,7 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
     /// <param name="doorOpenDirection">The direction the door would open.</param>
     /// <param name="material">Material of the cabinet</param>
     /// <param name="parent">Parent object anchor to.</param>
-    public virtual void Init(float width, float height, float insideBevelDepth, float cabinetDepth, float railWidth, float railDepth, float centerDepth, bool useHandleInsteadOfKnob,
+    public virtual void Init(float width, float height, float cabinetDepth, float railWidth, float railDepth, float centerDepth, bool useHandleInsteadOfKnob,
         HandlePlacement handlePlacement, DoorOpenDirection doorOpenDirection, Material material, GameObject parent)
     {
         mParent = parent;
@@ -98,7 +81,6 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         mHandlePlacement = handlePlacement;
         mDoorOpenDirection = doorOpenDirection;
         mUseHandleInsteadOfKnob = useHandleInsteadOfKnob;
-        mInsideBevelDepth = insideBevelDepth / Constants.FeetInAMeter;
         mCenterWidth = mWidth - mRailWidth * 2;
         mCenterHeight = mHeight - mRailWidth * 2;
     }
@@ -182,8 +164,16 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         mBottomObj = ProbuilderUtility.CreateShapeFromPolygon(mRailDepth, mTopBottomRailPoints, mMaterial, ProbuilderUtility.Side.Bottom.ToString());
         mBodyObj = ProbuilderUtility.CreateShapeFromPolygon(mCabinetDepth - mRailDepth, mBodyShapePoints, mMaterial, ProbuilderUtility.Side.Body.ToString());
         mHandleObj = mUseHandleInsteadOfKnob ? MakeHandle() : MakeKnob();
-
+        
         mCenterObj.transform.position = proBuilderParentObj.transform.position;
+
+        mCenterObj.transform.parent = proBuilderParentObj.transform;
+        mRightObj.transform.parent = proBuilderParentObj.transform;
+        mLeftObj.transform.parent = proBuilderParentObj.transform;
+        mTopObj.transform.parent = proBuilderParentObj.transform;
+        mBottomObj.transform.parent = proBuilderParentObj.transform;
+        mBodyObj.transform.parent = proBuilderParentObj.transform;
+        mHandleObj.transform.parent = proBuilderParentObj.transform;
 
         //Put all the pieces together into a cabinet shape.
         PlaceParts();
@@ -198,9 +188,6 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
         mBodyMesh = mBodyObj.GetComponent<ProBuilderMesh>();
         mHandleMesh = mHandleObj.GetComponent<ProBuilderMesh>();
 
-        //Bevel the inside edges of the rails.
-        BevelInsideEdges();
-
         //Rotate the right and left side UVs so they are oriented properly.
         ProbuilderUtility.RotateUVs90(mRightMesh, true);
         ProbuilderUtility.RotateUVs90(mLeftMesh, false);
@@ -210,19 +197,21 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
 
         //Combine all the meshes so we only have one object. Something that is interesting is that the anchor point for the combined mesh is determined by the last mesh in this list.
         List<ProBuilderMesh> meshes = new List<ProBuilderMesh> { mCenterMesh, mTopMesh, mLeftMesh, mBottomMesh, mRightMesh, mHandleMesh, mBodyMesh };
-        ProbuilderUtility.CombineAllMeshes(proBuilderParentObj, meshes);
+        
+        //Uncomment this to combine all meshes.
+        //ProbuilderUtility.CombineAllMeshes(proBuilderParentObj, meshes);
 
         //Refresh the meshes so everything is synced up.
         ProbuilderUtility.RefreshMeshes(meshes);
 
         //Clean up the unneeded objects.
-        DestroyImmediate(mCenterObj);
-        DestroyImmediate(mTopObj);
-        DestroyImmediate(mLeftObj);
-        DestroyImmediate(mBottomObj);
-        DestroyImmediate(mRightObj);
-        DestroyImmediate(mBodyObj);
-        DestroyImmediate(mHandleObj);
+        //DestroyImmediate(mCenterObj);
+        //DestroyImmediate(mTopObj);
+        //DestroyImmediate(mLeftObj);
+        //DestroyImmediate(mBottomObj);
+        //DestroyImmediate(mRightObj);
+        //DestroyImmediate(mBodyObj);
+        //DestroyImmediate(mHandleObj);
 
         proBuilderParentObj.transform.parent = mParent.transform;
         proBuilderParentObj.transform.eulerAngles = new Vector3(mParent.transform.eulerAngles.x, mParent.transform.eulerAngles.y, mParent.transform.eulerAngles.z);
@@ -267,7 +256,7 @@ public class ProbuilderCabinetWithShakerDoor : MonoBehaviour
             {
                 mHandleObj.transform.position = new Vector3(xWithOffset, mCenterHeight + handleBounds.size.y / 2, rail.transform.position.z);
             }
-            
+
         }
 
         //Handle is right in the middle of the door.

@@ -39,13 +39,13 @@ public class TestMakeCabinet : MonoBehaviour
 
             //Make the door.
             GameObject gameObject = new GameObject("ProBuilderCabinet-" + i);
-            ProbuilderCabinetWithShakerDoor cabinet = gameObject.AddComponent<ProbuilderCabinetWithShakerDoor>();
-            cabinet.Init(width, height, insideBevelDepth, cabinetDepth, railWidth, railDepth, centerDepth, useHandle, HandlePlacement.Bottom, DoorOpenDirection.Left, material, gameObject);
+            ProBuilderCabinetWithShakerDoor cabinet = gameObject.AddComponent<ProBuilderCabinetWithShakerDoor>();
+            cabinet.Init(width, height, cabinetDepth, railWidth, railDepth, centerDepth, useHandle, HandlePlacement.Bottom, DoorOpenDirection.Left, material, gameObject);
             gameObject.transform.position = cabinetObject.transform.position;
             cabinet.MakeShape();
         }
 
         sw.Stop();
-        Debug.Log($"Drew {numberOfCabinets} door(s): {sw.ElapsedMilliseconds}ms");
+        Debug.Log($"Drew {numberOfCabinets} cabinets(s): {sw.ElapsedMilliseconds}ms");
     }
 }
